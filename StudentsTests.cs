@@ -44,8 +44,8 @@ namespace SchoolTestProject
         [Test]
         [Description("Third test")]
         public void Thirdtest()
-        { 
-
+        {
+            bool hasMarksProperty = Array.Contains("Marks");
         }
     }
 }
