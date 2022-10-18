@@ -22,7 +22,7 @@ namespace SchoolTestProject
 
         [Test]
         [Description("Validate each students has unique ID property")]
-        public void ValidateIdPresense()
+        public void ValidateIdPresence()
         {
             List<JObject> studentsWithOutIDs = Array.ToObject<List<JObject>>();
             List<JObject> studentsListWithIds = AddStudentId(studentsWithOutIDs);
@@ -42,10 +42,70 @@ namespace SchoolTestProject
         }
 
         [Test]
-        [Description("Third test")]
-        public void Thirdtest()
+        [Description("Validate presence of Marks property")]
+        public void ValidateMarksProperty()
         {
-            bool hasMarksProperty = Array.Contains("Marks");
+            List<JObject> studentsJObjects = Array.ToObject<List<JObject>>();
+
+            foreach (var studentJObject in studentsJObjects)
+            {
+                JObject jObjectItem = studentJObject.ToObject<JObject>();
+                Assert.True(jObjectItem.ContainsKey("Marks"), "Missing property!");
+            }
+        }
+
+        [Test]
+        [Description("Validate object parsing")]
+        public void ValidateObjectParsing()
+        {
+            List<JObject> studentsJObjects = Array.ToObject<List<JObject>>();
+
+            List<string> expectedNamesList = new List<string>();
+            List<int> expectedAgesList = new List<int>();
+            List<Dictionary<string, int>> expectedMarksList = new List<Dictionary<string, int>>();
+
+            List<string> actualNamesList = new List<string>();
+            List<int> actualAgesList = new List<int>();
+            List<Dictionary<string, int>> actualMarksList = new List<Dictionary<string, int>>();
+
+            foreach (var studentJObject in studentsJObjects)
+            {
+                expectedNamesList.Add(studentJObject["Name"].ToObject<string>());
+                expectedAgesList.Add(studentJObject["Age"].ToObject<int>());
+                expectedMarksList.Add(studentJObject["Marks"].ToObject<Dictionary<string, int>>());
+            }
+
+            foreach (var student in School.StudentsList)
+            {
+                actualNamesList.Add(student.Name);
+                actualAgesList.Add(student.Age);
+                actualMarksList.Add(student.Marks);
+            }
+
+            CollectionAssert.AreEqual(expectedNamesList, actualNamesList);
+            CollectionAssert.AreEqual(expectedAgesList, actualAgesList);
+            CollectionAssert.AreEqual(expectedMarksList, actualMarksList);
+        }
+
+        [Test]
+        [Description("Validate graduated students' count")]
+        public void ValidateGraduatedStudentsCount()
+        {
+            int initialStudentsCount = School.StudentsList.Count;
+            List<JObject> studentsJObjectList = Array.ToObject<List<JObject>>();
+            List<JObject> studentsJObjectsWithIDs = AddStudentId(studentsJObjectList);
+
+            foreach (var student in studentsJObjectsWithIDs)
+            {
+                Student currentStudentFromTheList = student.ToObject<Student>();
+                currentStudentFromTheList.Age = student.GetValue("Age").ToObject<int>();
+                currentStudentFromTheList.Id = student.GetValue("Id").ToObject<int>();
+                if (currentStudentFromTheList.Age >= 18)
+                {
+                    School.RemoveStudent(currentStudentFromTheList.Id);
+                }
+            }
+            Assert.AreNotEqual(School.StudentsList.Count, initialStudentsCount);
         }
     }
 }
